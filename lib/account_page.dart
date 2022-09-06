@@ -1,13 +1,36 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class AccountPage extends StatefulWidget {
-  const AccountPage({Key? key}) : super(key: key);
+
+  final User user;
+
+  const AccountPage(this.user, {Key? key}) : super(key: key);
 
   @override
   State<AccountPage> createState() => _AccountPageState();
 }
 
 class _AccountPageState extends State<AccountPage> {
+
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+
+  int _postCount = 0;
+
+  @override
+  void initState() {
+    super.initState();
+
+    FirebaseFirestore.instance.collection('post').where('email', isEqualTo: widget.user.email)
+      .get().then((snapShot) => {
+          setState((){
+            _postCount = snapShot.docs.length;
+          })
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -21,7 +44,10 @@ class _AccountPageState extends State<AccountPage> {
       backgroundColor: Colors.white,
       actions: [
         IconButton(
-            onPressed: () {},
+            onPressed: () {
+              FirebaseAuth.instance.signOut();
+              _googleSignIn.signOut();
+            },
             icon: const Icon(
               Icons.exit_to_app,
               color: Colors.black,
@@ -41,12 +67,11 @@ class _AccountPageState extends State<AccountPage> {
             children: [
               Stack(
                 children: [
-                  const SizedBox(
+                  SizedBox(
                     width: 80.0,
                     height: 80.0,
                     child: CircleAvatar(
-                      backgroundImage: NetworkImage(
-                          'https://t4.ftcdn.net/jpg/00/76/27/53/360_F_76275384_mRNrmAI89UPWoWeUJfCL9CptRxg3cEoF.jpg'),
+                      backgroundImage: NetworkImage(widget.user.photoURL!),
                     ),
                   ),
                   Container(
@@ -79,15 +104,15 @@ class _AccountPageState extends State<AccountPage> {
                 ],
               ),
               const Padding(padding: EdgeInsets.all(4.0)),
-              const Text(
-                '이름',
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
+              Text(
+                widget.user.displayName!,
+                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18.0),
               )
             ],
           ),
-          const Text(
-            '4\n게시물',
-            style: TextStyle(fontSize: 18.0),
+          Text(
+            '$_postCount\n게시물',
+            style: const TextStyle(fontSize: 18.0),
             textAlign: TextAlign.center,
           ),
           const Text(

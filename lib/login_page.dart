@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_signin_button/flutter_signin_button.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:insta_clone/tab_page.dart';
 
 class LoginPage extends StatelessWidget {
   LoginPage({Key? key}) : super(key: key);
@@ -16,13 +17,13 @@ class LoginPage extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Text('Instgram Clone', style: TextStyle(fontSize: 40.0, fontWeight: FontWeight.bold),),
-            Padding(padding: EdgeInsets.all(50.0)),
+            const Text('Instgram Clone', style: TextStyle(fontSize: 40.0, fontWeight: FontWeight.bold),),
+            const Padding(padding: EdgeInsets.all(50.0)),
             SignInButton(
               Buttons.Google,
               onPressed: (){
                 _handleSignIn().then((user) => {
-                  print(user!.displayName)
+                  Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => TabPage(user!)))
                 });
               },
             )
